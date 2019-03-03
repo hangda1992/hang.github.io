@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <!-- Html Head Tag-->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content>
+  <meta name="author" content="hang">
+  <!-- Open Graph Data -->
+  <meta property="og:title" content="序列化-请求参数验证">
+  <meta property="og:description" content>
+  <meta property="og:site_name" content="航的博客">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="http://hangda1992.github.io">
+  
+    <link rel="alternate" href="/atom.xml" title="航的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+
+  <!-- Site Title -->
+  <title>航的博客</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <!-- Custom CSS -->
+  
+  <link rel="stylesheet" href="/css/style.light.css">
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+  <body>
+    <!-- Page Header -->
+
+
+<header class="site-header header-background" style="background-image: url(/img/default-banner-dark.jpg)">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="page-title with-background-image">
+          <p class="title">序列化-请求参数验证</p>
+          <p class="subtitle"></p>
+        </div>
+        <div class="site-menu with-background-image">
+          <ul>
+            
+              <li>
+                <a href="/">
+                  
+                  Home
+                  
+                </a>
+              </li>
+            
+              <li>
+                <a href="/archives">
+                  
+                  Archives
+                  
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/<your-github-username>">
+                  
+                  Github
+                  
+                </a>
+              </li>
+            
+              <li>
+                <a href="mailto:<your-email-address>">
+                  
+                  Email
+                  
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<article>
+  <div class="container typo">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-info text-muted">
+          
+            <!-- Author -->
+            <span class="author info">By hang</span>
+          
+          <!-- Date -->
+          <span class="date-time info">On
+            <span class="date">2018-11-26</span>
+            <span class="time">10:44:48</span>
+          </span>
+          
+        </div>
+        <!-- Tags -->
+        
+          <div class="post-tags text-muted">
+            Tags: 
+
+<a class="tag" href="/tags/Python/">#Python</a>
+
+
+          </div>
+        
+        <!-- Post Main Content -->
+        <div class="post-content">
+          <hr>
+<p><strong>误解：</strong>之前刚看序列号的时候总觉得这个功能没有啥用，django返回的格式序列化，感觉自己也能做到这点，没有必要用到这序列化的功能，浪费时间写</p>
+<p><strong>正解：</strong>序列化的一个重要功能能够对请求的参数进行验证</p>
+<h4 id="建立django项目"><a href="#建立django项目" class="headerlink" title="建立django项目"></a>建立django项目</h4><ul>
+<li><p>环境</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python== 3.5</span><br><span class="line">django==1.11</span><br><span class="line">djangorestframework==3.90</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建虚拟环境</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">virtualenv env</span><br><span class="line">source env/bin/activate</span><br><span class="line">pip install django</span><br><span class="line">pip install djangorestframework</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>建立工程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">django-admin startproject tutorial</span><br><span class="line">cd tutorial</span><br><span class="line">python manage.py startapp snippets</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置djangosettings.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">INSTALLED_APPS = (</span><br><span class="line">    ...</span><br><span class="line">    &apos;rest_framework&apos;,</span><br><span class="line">    &apos;snippets.apps.SnippetsConfig&apos;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="编写序列化类"><a href="#编写序列化类" class="headerlink" title="编写序列化类"></a>编写序列化类</h4><p>在app<code>snippets</code>下面创建<code>serializers.py</code>用于序列化类，作用：验证请求参数为<code>id</code>并且最大值设定为<code>2</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework import serializers</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class SnippetSerializer(serializers.Serializer):</span><br><span class="line">    id = serializers.IntegerField(max_value=2)</span><br></pre></td></tr></table></figure></p>
+<h4 id="编写视图"><a href="#编写视图" class="headerlink" title="编写视图"></a>编写视图</h4><p>视图函数用于处理请求信息，路径<code>snippets\views.py</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework.parsers import JSONParser</span><br><span class="line">from snippets.serializers import SnippetSerializer</span><br><span class="line">from django.http import HttpResponse, JsonResponse</span><br><span class="line">from django.views.decorators.csrf import csrf_exempt</span><br><span class="line"># Create your views here.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@csrf_exempt</span><br><span class="line">def test001(request):</span><br><span class="line"></span><br><span class="line">    if request.method == &apos;POST&apos;:</span><br><span class="line">    	# 用于获取request对象中的post求情参数</span><br><span class="line">        data = JSONParser().parse(request)</span><br><span class="line">        # 序列化data参数，这里data必须是json格式</span><br><span class="line">        serializer = SnippetSerializer(data=data)</span><br><span class="line">        # 判断是否满足序列化条件</span><br><span class="line">        if serializer.is_valid():</span><br><span class="line">            return JsonResponse(serializer.data, status=201)</span><br><span class="line">        return JsonResponse(serializer.errors, status=400)</span><br><span class="line">    if request.method == &apos;GET&apos;:</span><br><span class="line">    	# 用于获取request对象中的get请求参数</span><br><span class="line">        data = request.GET.dict()</span><br><span class="line">        # 序列化data参数，这里data必须是json格式</span><br><span class="line">        serializer = SnippetSerializer(data=data)</span><br><span class="line">        if serializer.is_valid():</span><br><span class="line">            return JsonResponse(serializer.data, status=201)</span><br><span class="line">        return JsonResponse(serializer.errors, status=400)</span><br></pre></td></tr></table></figure>
+<h4 id="配置路由"><a href="#配置路由" class="headerlink" title="配置路由"></a>配置路由</h4><p>设置一个测试的路由，路径<code>tutorial\urls.py</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">from django.conf.urls import url</span><br><span class="line">from django.contrib import admin</span><br><span class="line">from snippets import views</span><br><span class="line"></span><br><span class="line">urlpatterns = [</span><br><span class="line">    url(r&apos;^admin/&apos;, admin.site.urls),</span><br><span class="line">    url(r&apos;^test&apos;, views.test001),</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<h4 id="整体目录结构"><a href="#整体目录结构" class="headerlink" title="整体目录结构"></a>整体目录结构</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.\snippets</span><br><span class="line">.\snippets\migrations\__init__.py</span><br><span class="line">.\snippets\admin.py</span><br><span class="line">.\snippets\apps.py</span><br><span class="line">.\snippets\models.py</span><br><span class="line">.\snippets\serializers.py</span><br><span class="line">.\snippets\tests.py</span><br><span class="line">.\snippets\views.py</span><br><span class="line">.\snippets\__init__.py</span><br><span class="line">.\snippets\migrations</span><br><span class="line">.\tutorial</span><br><span class="line">.\tutorial\settings.py</span><br><span class="line">.\tutorial\urls.py</span><br><span class="line">.\tutorial\wsgi.py</span><br><span class="line">.\tutorial\__init__.py</span><br><span class="line">.\db.sqlite3</span><br><span class="line">.\manage.py</span><br></pre></td></tr></table></figure>
+<h4 id="测试序列化效果"><a href="#测试序列化效果" class="headerlink" title="测试序列化效果"></a>测试序列化效果</h4><h5 id="POST-http-127-0-0-1-8000-test"><a href="#POST-http-127-0-0-1-8000-test" class="headerlink" title="POST\http://127.0.0.1:8000/test"></a><code>POST\http://127.0.0.1:8000/test</code></h5><ul>
+<li>正确传参<br><strong>参数：</strong><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"id"</span>: <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>返回值：</strong><br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"id"</span>: <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>错误（数值大于2）<br><strong>参数：</strong><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"id"</span>: <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>返回值：</strong><br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"id"</span>: [</span><br><span class="line">        <span class="string">"Ensure this value is less than or equal to 2."</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="GET-http-127-0-0-1-8000-test"><a href="#GET-http-127-0-0-1-8000-test" class="headerlink" title="GET\http://127.0.0.1:8000/test"></a><code>GET\http://127.0.0.1:8000/test</code></h5><ul>
+<li><p>正确传参<code>http://127.0.0.1:8000/test?id=1</code><br><strong>返回值：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"id"</span>: <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>错误传参<code>http://127.0.0.1:8000/test?id=3</code><br><strong>返回值：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"id"</span>: [</span><br><span class="line">        <span class="string">"Ensure this value is less than or equal to 2."</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <p class="copyright text-muted">
+          Theme By <a target="_blank" href="https://github.com/levblanc">Levblanc.</a>
+          Inspired By <a target="_blank" href="https://github.com/klugjo/hexo-theme-clean-blog">Clean Blog.</a>
+        </p><p class="copyright text-muted">
+          Powered By <a target="_blank" href="https://hexo.io/">Hexo.</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <!-- After Footer Scripts -->
+<script src="/js/highlight.pack.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(event) {
+    var codeBlocks = Array.prototype.slice.call(document.getElementsByTagName('pre'))
+    codeBlocks.forEach(function(block, index) {
+      hljs.highlightBlock(block);
+    });
+  });
+</script>
+
+  </body>
+</html>
+
