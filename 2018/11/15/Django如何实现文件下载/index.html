@@ -100,8 +100,14 @@
           <!-- Date -->
           <span class="date-time info">On
             <span class="date">2018-11-15</span>
-            <span class="time">10:44:48</span>
+            <span class="time">12:16:06</span>
           </span>
+          
+          <!--  Categories  -->
+            <span class="categories info">Under 
+
+<a href="/categories/Django/">Django</a>
+</span>
           
         </div>
         <!-- Tags -->
@@ -109,14 +115,16 @@
           <div class="post-tags text-muted">
             Tags: 
 
-<a class="tag" href="/tags/Python/">#Python</a>
+<a class="tag" href="/tags/Python/">#Python</a> <a class="tag" href="/tags/Django/">#Django</a>
 
 
           </div>
         
         <!-- Post Main Content -->
         <div class="post-content">
-          <h2 id="Django-如何实现文件下载"><a href="#Django-如何实现文件下载" class="headerlink" title="Django 如何实现文件下载"></a>Django 如何实现文件下载</h2><hr>
+          <p>说明： Django 带有下载文件模块FileResponse，利用这个模块可以实现浏览器下载功能</p>
+<a id="more"></a>
+<hr>
 <h3 id="1-思路"><a href="#1-思路" class="headerlink" title="1.思路"></a>1.思路</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">文件，让用户下载</span><br><span class="line">    - a标签+静态文件</span><br><span class="line">    - 设置响应头(django如何实现文件下载）</span><br></pre></td></tr></table></figure>
 <h3 id="2-a标签实现"><a href="#2-a标签实现" class="headerlink" title="2. a标签实现"></a>2. a标签实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;/static/xxx.xlsx&quot;&gt;下载模板&lt;/a&gt;</span><br></pre></td></tr></table></figure>
 <h3 id="3-设置响应头"><a href="#3-设置响应头" class="headerlink" title="3. 设置响应头"></a>3. 设置响应头</h3><ul>
